@@ -3,29 +3,31 @@ workflows:
     name: Build for simulator
     environment:
       xcode: 15.3
-      flutter: 3.24.5  # or your specific version
+      flutter: 3.24.5
     scripts:
-      - name: Install Flutter dependencies
+      - name: Get Flutter packages
         script: |
           flutter pub get
 
-      - name: Generate iOS configs
+      - name: Clean & generate iOS build files
         script: |
-          flutter build ios --debug --no-codesign
+          flutter clean
+          flutter build ios --debug --no-codesign --simulator
 
-      - name: Install CocoaPods
+      - name: Install CocoaPods dependencies
         script: |
           cd ios
           pod install
           cd ..
 
-      - name: Build with Generic Destination
+      - name: Build with xcodebuild (simulator)
         script: |
           xcodebuild build \
-            -project "ios/Runner.xcodeproj" \
-            -scheme "Runner" \
+            -project ios/Runner.xcodeproj \
+            -scheme Runner \
             -sdk iphonesimulator \
-            -configuration Debug
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator'
 
     artifacts:
       - /Users/builder/Library/Developer/Xcode/DerivedData/**/*.app
