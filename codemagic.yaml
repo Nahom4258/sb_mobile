@@ -9,6 +9,10 @@ workflows:
         script: |
           flutter pub get
 
+      - name: Generate localization files
+        script: |
+          flutter gen-l10n
+
       - name: Clean & generate iOS build files
         script: |
           flutter clean
