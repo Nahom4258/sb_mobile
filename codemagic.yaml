@@ -19,14 +19,14 @@ workflows:
       - name: Check Flutter version
         script: fvm flutter --version
 
+      - name: Clean previous build
+        script: fvm flutter clean
+
       - name: Install Flutter packages
         script: fvm flutter pub get
 
       - name: Generate localization files
         script: fvm flutter gen-l10n
-
-      - name: Clean previous build
-        script: fvm flutter clean
 
       - name: Resolve CocoaPods
         script: |
@@ -46,10 +46,3 @@ workflows:
 
     artifacts:
       - /Users/builder/Library/Developer/Xcode/DerivedData/**/*.app
-
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-        - .dart_tool/
-        - build/
-        - ios/Pods
