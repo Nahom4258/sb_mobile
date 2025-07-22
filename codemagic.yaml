@@ -1,37 +1,55 @@
 workflows:
   simulator-workflow:
     name: Build for simulator
+
     environment:
-      xcode: 15.3
-      flutter: 3.24.5
+      xcode: latest
+      cocoapods: default
+      vars:
+        FLUTTER_VERSION: 3.24.5
+
     scripts:
-      - name: Get Flutter packages
+      - name: Install FVM and Flutter
         script: |
-          flutter pub get
+          dart pub global activate fvm
+          fvm install
+          fvm install $FLUTTER_VERSION
+          fvm use $FLUTTER_VERSION
+
+      - name: Check Flutter version
+        script: fvm flutter --version
+
+      - name: Install Flutter packages
+        script: fvm flutter pub get
 
       - name: Generate localization files
-        script: |
-          flutter gen-l10n
+        script: fvm flutter gen-l10n
 
-      - name: Clean & generate iOS build files
-        script: |
-          flutter clean
-          flutter build ios --debug --no-codesign --simulator
+      - name: Clean previous build
+        script: fvm flutter clean
 
-      - name: Install CocoaPods dependencies
+      - name: Resolve CocoaPods
         script: |
           cd ios
           pod install
           cd ..
 
-      - name: Build with xcodebuild (simulator)
+      - name: Build with Generic Destination
         script: |
           xcodebuild build \
-            -project ios/Runner.xcodeproj \
-            -scheme Runner \
+            -project "ios/Runner.xcodeproj" \
+            -scheme "Runner" \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'generic/platform=iOS Simulator'
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
 
     artifacts:
       - /Users/builder/Library/Developer/Xcode/DerivedData/**/*.app
+
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+        - .dart_tool/
+        - build/
+        - ios/Pods
